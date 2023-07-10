@@ -33,51 +33,22 @@ SELECT COUNT(DISTINCT(DECODE(TO_CHAR(AFSIS.DATA, 'MM'), '01', (NVL((AFSIS.CODCLI
                        PCCLIENT.FANTASIA,
                        PCATIVI.CODATIV,
                        PCATIVI.RAMO,
-                       SUM(ROUND(NVL(PCPEDI.QT, 0) *
-                                 (NVL(PCPEDI.PVENDA, 0) +
-                                  NVL(PCPEDI.VLOUTRASDESP, 0) +
-                                  NVL(PCPEDI.VLFRETE, 0)),
-                                 2)) AS PVENDA,
-                       ROUND(SUM(NVL(PCPEDI.QT, 0) *
-                                 (NVL(PCPEDI.PVENDA, 0) - NVL(PCPEDI.ST, 0))),
-                             2) AS PVENDA_SEMST,
-                       ROUND(SUM(NVL(PCPRODUT.PESOBRUTO, 0) *
-                                 NVL(PCPEDI.QT, 0)),
-                             2) AS TOTPESO,
-                       ROUND(SUM(NVL(PCPRODUT.VOLUME, 0) * NVL(PCPEDI.QT, 0)),
-                             2) Volume,
-                       ROUND(SUM(NVL(PCPRODUT.LITRAGEM, 0) *
-                                 NVL(PCPEDI.QT, 0)),
-                             2) LITRAGEM,
+                       SUM(ROUND(NVL(PCPEDI.QT, 0) * (NVL(PCPEDI.PVENDA, 0) + NVL(PCPEDI.VLOUTRASDESP, 0) + NVL(PCPEDI.VLFRETE, 0)), 2)) AS PVENDA,
+                       ROUND(SUM(NVL(PCPEDI.QT, 0) * (NVL(PCPEDI.PVENDA, 0) - NVL(PCPEDI.ST, 0))), 2) AS PVENDA_SEMST,
+                       ROUND(SUM(NVL(PCPRODUT.PESOBRUTO, 0) * NVL(PCPEDI.QT, 0)), 2) AS TOTPESO,
+                       ROUND(SUM(NVL(PCPRODUT.VOLUME, 0) * NVL(PCPEDI.QT, 0)), 2) VOLUME,
+                       ROUND(SUM(NVL(PCPRODUT.LITRAGEM, 0) * NVL(PCPEDI.QT, 0)), 2) LITRAGEM,
                        COUNT(DISTINCT(PCPEDI.CODPROD)) TOTMIXPROD,
-                       SUM(NVL(PCPEDI.QT, 0) /
-                           DECODE(NVL(PCPRODUT.QTUNIT, 0),
-                                  0,
-                                  1,
-                                  NVL(PCPRODUT.QTUNIT, 1))) TOTQTUNIT,
-                       SUM(NVL(PCPEDI.QT, 0) /
-                           DECODE(NVL(PCPRODUT.QTUNITCX, 0),
-                                  0,
-                                  1,
-                                  NVL(PCPRODUT.QTUNITCX, 1))) TOTQTUNITCX,
+                       SUM(NVL(PCPEDI.QT, 0) / DECODE(NVL(PCPRODUT.QTUNIT, 0), 0, 1, NVL(PCPRODUT.QTUNIT, 1))) TOTQTUNIT,
+                       SUM(NVL(PCPEDI.QT, 0) / DECODE(NVL(PCPRODUT.QTUNITCX, 0), 0, 1, NVL(PCPRODUT.QTUNITCX, 1))) TOTQTUNITCX,
                        SUM(PCPEDI.QT) AS QT,
-                       ROUND(SUM(NVL(PCPEDI.QT, 0) * NVL(PCPEDI.PBONIFIC, 0)),
-                             2) PBONIFIC
-                  FROM PCPEDI,
-                       PCPEDC,
-                       PCPRODUT,
-                       PCFORNEC,
-                       PCDEPTO,
-                       PCCLIENT,
-                       PCUSUARI,
-                       PCATIVI,
-                       PCPRACA
+                       ROUND(SUM(NVL(PCPEDI.QT, 0) * NVL(PCPEDI.PBONIFIC, 0)), 2) PBONIFIC
+                  FROM PCPEDI, PCPEDC, PCPRODUT, PCFORNEC, PCDEPTO, PCCLIENT, PCUSUARI, PCATIVI, PCPRACA
                  WHERE PCPEDI.NUMPED = PCPEDC.NUMPED
                    AND PCUSUARI.CODSUPERVISOR NOT IN ('9999')
                    AND PCPEDC.DATA BETWEEN :DTINI AND :DTFIM
                    AND PCPEDC.CODFILIAL IN (:CODFILIAL)
-                   AND PCPEDC.CONDVENDA IN
-                       (1, 2, 3, 7, 9, 14, 15, 17, 18, 19, 98)
+                   AND PCPEDC.CONDVENDA IN (1, 2, 3, 7, 9, 14, 15, 17, 18, 19, 98)
                    AND NVL(PCPEDI.BONIFIC, 'N') = 'N'
                    AND PCPEDC.POSICAO = 'F'
                    AND NVL(PCPEDC.CODEMITENTE, 0) IN (8888)
@@ -89,10 +60,5 @@ SELECT COUNT(DISTINCT(DECODE(TO_CHAR(AFSIS.DATA, 'MM'), '01', (NVL((AFSIS.CODCLI
                    AND PCPRODUT.CODFORNEC = PCFORNEC.CODFORNEC(+)
                    AND PCPEDC.CODUSUR = PCUSUARI.CODUSUR
                    AND PCPEDC.CODPRACA = PCPRACA.CODPRACA(+)
-                 GROUP BY PCCLIENT.CODCLI,
-                          PCPEDC.DATA,
-                          PCCLIENT.CLIENTE,
-                          PCCLIENT.FANTASIA,
-                          PCATIVI.CODATIV,
-                          PCATIVI.RAMO
+                 GROUP BY PCCLIENT.CODCLI, PCPEDC.DATA, PCCLIENT.CLIENTE, PCCLIENT.FANTASIA, PCATIVI.CODATIV, PCATIVI.RAMO
                  ORDER BY PVENDA DESC)) AFSIS
